@@ -68,11 +68,13 @@ async function loadDashboard() {
 
   refs.alertList.innerHTML = "";
   if (!data.low_stock_items.length) {
-    refs.alertList.innerHTML = "<li>All items are above reorder thresholds.</li>";
+    refs.alertList.innerHTML = "<li style='color: var(--ok); font-weight:600'>✅ You're good! All items are well-stocked.</li>";
   } else {
     data.low_stock_items.forEach((item) => {
       const li = document.createElement("li");
-      li.textContent = `${item.name}: ${item.current_stock} ${item.unit} remaining (reorder level ${item.reorder_level}).`;
+      const critical = item.current_stock < item.reorder_level * 0.6;
+      const icon = critical ? "🚨" : "⚠️";
+      li.innerHTML = `${icon} <strong>${item.name}</strong>: ${item.current_stock} ${item.unit} left (should have ${item.reorder_level})`;
       refs.alertList.appendChild(li);
     });
   }
@@ -144,7 +146,7 @@ async function loadOrders() {
         method: "PATCH",
         body: JSON.stringify({ status: "received" }),
       });
-      showToast(`Order ${orderId} marked as received`);
+      showToast(`✅ Order ${orderId} received and stock updated`);
       await refreshAll();
     });
   });
@@ -169,10 +171,10 @@ forms.inventory.addEventListener("submit", async (e) => {
     const body = parseForm(forms.inventory);
     await api("/api/inventory", { method: "POST", body: JSON.stringify(body) });
     forms.inventory.reset();
-    showToast("Inventory item created");
+    showToast("✅ Got it! Item added to stock");
     await refreshAll();
   } catch (err) {
-    showToast(`Inventory error: ${err.message}`, 3500);
+    showToast(`⚠️ Couldn't add item: ${err.message}`, 3500);
   }
 });
 
@@ -182,10 +184,10 @@ forms.supplier.addEventListener("submit", async (e) => {
     const body = parseForm(forms.supplier);
     await api("/api/suppliers", { method: "POST", body: JSON.stringify(body) });
     forms.supplier.reset();
-    showToast("Supplier added");
+    showToast("✅ Supplier saved");
     await refreshAll();
   } catch (err) {
-    showToast(`Supplier error: ${err.message}`, 3500);
+    showToast(`⚠️ Oops: ${err.message}`, 3500);
   }
 });
 
@@ -199,10 +201,10 @@ forms.order.addEventListener("submit", async (e) => {
 
     await api("/api/orders", { method: "POST", body: JSON.stringify(body) });
     forms.order.reset();
-    showToast("Purchase order created");
+    showToast("✅ Order placed!");
     await refreshAll();
   } catch (err) {
-    showToast(`Order error: ${err.message}`, 3500);
+    showToast(`⚠️ Couldn't create order: ${err.message}`, 3500);
   }
 });
 
@@ -218,21 +220,23 @@ forms.forecast.addEventListener("submit", async (e) => {
     const p = data.prediction;
     const recs = data.suggested_procurement.length
       ? data.suggested_procurement
-          .map((x) => `<li>${x.name}: ${x.recommended_quantity} units (est. ${money(x.estimated_cost)})</li>`)
+          .map((x) => `<li>📦 <strong>${x.name}</strong>: grab about ${x.recommended_quantity} units (roughly ${money(x.estimated_cost)})</li>`)
           .join("")
-      : "<li>No procurement top-up required right now.</li>";
+      : "<li>✅ You're all stocked up! No top-ups needed right now.</li>";
 
     refs.forecastResult.classList.remove("muted");
     refs.forecastResult.innerHTML = `
-      <p><strong>Predicted Cluster:</strong> ${p.cluster} (${p.cluster_name})</p>
-      <p><strong>Alert:</strong> ${p.supply_alert} | <strong>Confidence:</strong> ${p.confidence} (${p.membership_strength})</p>
-      <p><strong>Action:</strong> ${p.supply_action}</p>
-      <p><strong>Recommended Procurement:</strong></p>
-      <ul>${recs}</ul>
+      <div style="line-height: 1.8">
+        <p><strong>🎯 Expected Demand:</strong> ${p.cluster_name}</p>
+        <p><strong>📊 Confidence:</strong> ${(Number(p.membership_strength) * 100).toFixed(0)}% sure</p>
+        <p><strong>💡 What to do:</strong> ${p.supply_action}</p>
+        <p><strong>📋 Suggested Restocking:</strong></p>
+        <ul style="margin:8px 0">${recs}</ul>
+      </div>
     `;
   } catch (err) {
     refs.forecastResult.classList.remove("muted");
-    refs.forecastResult.innerHTML = `<p style="color:#b91c1c">Forecast error: ${err.message}</p>`;
+    refs.forecastResult.innerHTML = `<p style="color:#b91c1c">❌ Forecast failed: ${err.message}</p>`;
   }
 });
 
@@ -245,4 +249,4 @@ async function refreshAll() {
   await Promise.all([loadDashboard(), loadInventory(), loadSuppliers(), loadOrders()]);
 }
 
-refreshAll().catch((err) => showToast(`Failed to load data: ${err.message}`, 4000));
+refreshAll().catch((err) => showToast(`⚠️ Couldn't load the dashboard: ${err.message}`, 4000));
