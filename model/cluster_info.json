@@ -1,0 +1,31 @@
+{
+  "-1": {
+    "name": "Anomalous / Atypical Day",
+    "supply_alert": "REVIEW",
+    "avg_daily_sold": 0,
+    "supply_action": "This day does not match any known operational pattern. It is likely a break-period day, a public holiday, or an unusually low-traffic day. Flag for manual procurement review. Default to minimum stock until the cause is confirmed.",
+    "size": 985
+  },
+  "0": {
+    "name": "High-Volume Hub Days (Africa Hall)",
+    "supply_alert": "CRITICAL",
+    "avg_daily_sold": 2020.2,
+    "avg_waste_rate_pct": 13.75,
+    "avg_profit_margin": 39.59,
+    "pct_break_days": 0.0,
+    "pct_exam_days": 0.022,
+    "supply_action": "Africa Hall cafeteria only. Volume is ~5x the campus average. Order ingredients 2 days in advance. Ensure all 6 meals are fully stocked at opening. Pre-assign extra kitchen staff. Monitor sellout every 2 hours \u2014 restock immediately.",
+    "size": 90
+  },
+  "1": {
+    "name": "Standard Operational Days",
+    "supply_alert": "NORMAL",
+    "avg_daily_sold": 389.2,
+    "avg_waste_rate_pct": 12.74,
+    "avg_profit_margin": 38.67,
+    "pct_break_days": 0.346,
+    "pct_exam_days": 0.164,
+    "supply_action": "Normal procurement using 7-day rolling average as the base. Adjust up by 10% for teaching days, down by 55% for weekends. Reduce by 60% during semester breaks. Check waste percentage daily \u2014 if above 15%, reduce next order by 10%.",
+    "size": 4035
+  }
+}
