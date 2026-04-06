@@ -267,7 +267,18 @@ def _normalize_keys(payload: dict) -> dict:
 
     normalized = {}
     for k, v in payload.items():
-        normalized[key_map.get(k, k)] = v
+        mapped_key = key_map.get(k, k)
+
+        # UI uses 0=Sunday..6=Saturday, while training data uses
+        # pandas dayofweek (0=Monday..6=Sunday).
+        if mapped_key == "DayOfWeekNum":
+            try:
+                v = int(v)
+                v = (v + 6) % 7
+            except (TypeError, ValueError):
+                pass
+
+        normalized[mapped_key] = v
     return normalized
 
 
