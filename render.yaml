@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: group17-food-supply-chain-management
+    env: docker
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /health

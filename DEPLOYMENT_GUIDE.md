@@ -104,6 +104,20 @@ docker stop <container_id>
 
 ---
 
+## Option C — Render (public live URL)
+
+Use Render if you want a shareable live web address without managing a VM.
+
+1. Push this repository to GitHub.
+2. In Render, choose **New +** then **Blueprint**.
+3. Connect the GitHub repo and let Render read [render.yaml](render.yaml).
+4. Deploy the `group17-food-supply-chain-management` web service.
+5. Render will build the Docker image, train the model during build, and expose the app on a public `https://...onrender.com` URL.
+
+Once deployed, the main app is available at `/`, and the health check is at `/health`.
+
+---
+
 ## Manual curl tests
 
 ```bash
