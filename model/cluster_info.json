@@ -3,43 +3,51 @@
     "name": "Anomalous / Atypical Day",
     "supply_alert": "REVIEW",
     "avg_daily_sold": 0,
-    "supply_action": "This day does not match any learned operational pattern. Flag for manual procurement review and use conservative stock.",
-    "size": 169
+    "supply_action": "This day does not match any known operational pattern. It is likely a break-period day, a public holiday, or an unusually low-traffic day. Flag for manual procurement review. Default to minimum stock until the cause is confirmed.",
+    "size": 236
   },
   "0": {
-    "name": "High-Volume Operational Days",
-    "supply_alert": "CRITICAL",
-    "avg_daily_sold": 2031.8,
-    "avg_daily_revenue": 7505254.2,
-    "avg_daily_profit": 2954169.8,
-    "supply_action": "Demand is in a high-volume regime. Increase procurement, order earlier, and monitor sell-through every 2 hours.",
-    "size": 120
+    "name": "Standard Operational Days",
+    "supply_alert": "NORMAL",
+    "avg_daily_sold": 276.4,
+    "avg_waste_rate_pct": 12.65,
+    "avg_profit_margin": 38.79,
+    "pct_break_days": 0.387,
+    "pct_exam_days": 0.15,
+    "supply_action": "Normal procurement using 7-day rolling average as the base. Adjust up by 10% for teaching days, down by 55% for weekends. Reduce by 60% during semester breaks. Check waste percentage daily \u2014 if above 15%, reduce next order by 10%.",
+    "size": 1430
   },
   "1": {
-    "name": "Standard Operational Days",
-    "supply_alert": "NORMAL",
-    "avg_daily_sold": 1276.9,
-    "avg_daily_revenue": 4728980.0,
-    "avg_daily_profit": 1879074.2,
-    "supply_action": "Use normal procurement anchored to recent averages and adjust for day-specific variation.",
-    "size": 50
+    "name": "High-Volume Demand Days",
+    "supply_alert": "CRITICAL",
+    "avg_daily_sold": 2021.4,
+    "avg_waste_rate_pct": 14.77,
+    "avg_profit_margin": 38.99,
+    "pct_break_days": 0.0,
+    "pct_exam_days": 0.0,
+    "supply_action": "Demand is significantly above the campus baseline. Place ingredient orders at least 2 days in advance. Start service with full menu availability and assign extra staff. Track sellout every 2 hours and replenish quickly where needed.",
+    "size": 22
   },
   "2": {
-    "name": "Standard Operational Days",
-    "supply_alert": "NORMAL",
-    "avg_daily_sold": 1235.2,
-    "avg_daily_revenue": 4544601.4,
-    "avg_daily_profit": 1814790.8,
-    "supply_action": "Use normal procurement anchored to recent averages and adjust for day-specific variation.",
-    "size": 74
+    "name": "High-Volume Demand Days",
+    "supply_alert": "CRITICAL",
+    "avg_daily_sold": 2039.5,
+    "avg_waste_rate_pct": 12.35,
+    "avg_profit_margin": 40.29,
+    "pct_break_days": 0.0,
+    "pct_exam_days": 0.0,
+    "supply_action": "Demand is significantly above the campus baseline. Place ingredient orders at least 2 days in advance. Start service with full menu availability and assign extra staff. Track sellout every 2 hours and replenish quickly where needed.",
+    "size": 21
   },
   "3": {
     "name": "Standard Operational Days",
     "supply_alert": "NORMAL",
-    "avg_daily_sold": 336.9,
-    "avg_daily_revenue": 1242826.6,
-    "avg_daily_profit": 480377.0,
-    "supply_action": "Use normal procurement anchored to recent averages and adjust for day-specific variation.",
-    "size": 4711
+    "avg_daily_sold": 407.6,
+    "avg_waste_rate_pct": 12.79,
+    "avg_profit_margin": 38.69,
+    "pct_break_days": 0.396,
+    "pct_exam_days": 0.162,
+    "supply_action": "Normal procurement using 7-day rolling average as the base. Adjust up by 10% for teaching days, down by 55% for weekends. Reduce by 60% during semester breaks. Check waste percentage daily \u2014 if above 15%, reduce next order by 10%.",
+    "size": 3415
   }
 }

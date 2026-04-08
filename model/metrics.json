@@ -1,22 +1,15 @@
 {
-  "model": "HDBSCAN (deployment-aligned 6-feature training)",
+  "model": "HDBSCAN (standalone hdbscan package)",
+  "sklearn_hdbscan_note": "sklearn HDBSCAN has no .predict() \u2014 we use the standalone hdbscan package which has approximate_predict()",
   "min_cluster_size": 20,
   "min_samples": 20,
   "prediction_data": true,
   "n_clusters": 4,
-  "noise_count": 169,
-  "noise_pct": 3.3,
-  "silhouette": 0.5115,
-  "davies_bouldin": 0.8404,
-  "calinski_harabasz": 1268.5,
+  "noise_count": 236,
+  "noise_pct": 4.61,
+  "silhouette": 0.2048,
+  "davies_bouldin": 1.3679,
+  "calinski_harabasz": 526.9,
   "n_samples": 5124,
-  "n_features": 6,
-  "feature_names": [
-    "Daily_Prepared",
-    "Daily_Sold",
-    "Daily_Revenue",
-    "Daily_Profit",
-    "DayOfWeekNum",
-    "Month"
-  ]
+  "n_features": 13
 }

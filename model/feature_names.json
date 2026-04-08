@@ -1,8 +1,15 @@
 [
   "Daily_Prepared",
   "Daily_Sold",
+  "Daily_Waste",
   "Daily_Revenue",
   "Daily_Profit",
-  "DayOfWeekNum",
-  "Month"
+  "Daily_Sellout_Rate",
+  "Daily_Waste_Rate",
+  "Daily_Profit_Margin",
+  "DOW_sin",
+  "DOW_cos",
+  "Month_sin",
+  "Month_cos",
+  "Is_Weekend"
 ]

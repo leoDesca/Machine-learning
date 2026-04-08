@@ -152,15 +152,18 @@ async function loadOrders() {
   });
 }
 
-function parseForm(form) {
+function parseForm(form, numericFields = []) {
   const out = Object.fromEntries(new FormData(form).entries());
+  const numericSet = new Set(numericFields);
   Object.keys(out).forEach((k) => {
     if (out[k] === "") {
       out[k] = null;
       return;
     }
-    const n = Number(out[k]);
-    if (!Number.isNaN(n)) out[k] = n;
+    if (numericSet.has(k)) {
+      const n = Number(out[k]);
+      if (!Number.isNaN(n)) out[k] = n;
+    }
   });
   return out;
 }
@@ -168,7 +171,12 @@ function parseForm(form) {
 forms.inventory.addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
-    const body = parseForm(forms.inventory);
+    const body = parseForm(forms.inventory, [
+      "current_stock",
+      "reorder_level",
+      "unit_cost",
+      "supplier_id",
+    ]);
     await api("/api/inventory", { method: "POST", body: JSON.stringify(body) });
     forms.inventory.reset();
     showToast("✅ Got it! Item added to stock");
@@ -181,7 +189,7 @@ forms.inventory.addEventListener("submit", async (e) => {
 forms.supplier.addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
-    const body = parseForm(forms.supplier);
+    const body = parseForm(forms.supplier, ["lead_time_days", "reliability_score"]);
     await api("/api/suppliers", { method: "POST", body: JSON.stringify(body) });
     forms.supplier.reset();
     showToast("✅ Supplier saved");
@@ -194,7 +202,7 @@ forms.supplier.addEventListener("submit", async (e) => {
 forms.order.addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
-    const body = parseForm(forms.order);
+    const body = parseForm(forms.order, ["supplier_id", "inventory_id", "quantity"]);
     body.items = [{ inventory_id: body.inventory_id, quantity: body.quantity }];
     delete body.inventory_id;
     delete body.quantity;
@@ -211,7 +219,14 @@ forms.order.addEventListener("submit", async (e) => {
 forms.forecast.addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
-    const body = parseForm(forms.forecast);
+    const body = parseForm(forms.forecast, [
+      "daily_prepared",
+      "daily_sold",
+      "daily_revenue",
+      "daily_profit",
+      "dow",
+      "month",
+    ]);
     const data = await api("/api/forecast-procurement", {
       method: "POST",
       body: JSON.stringify(body),
@@ -220,23 +235,23 @@ forms.forecast.addEventListener("submit", async (e) => {
     const p = data.prediction;
     const recs = data.suggested_procurement.length
       ? data.suggested_procurement
-          .map((x) => `<li>📦 <strong>${x.name}</strong>: grab about ${x.recommended_quantity} units (roughly ${money(x.estimated_cost)})</li>`)
+          .map((x) => `<li><strong>${x.name}</strong>: order ${x.recommended_quantity} units (estimated ${money(x.estimated_cost)})</li>`)
           .join("")
-      : "<li>✅ You're all stocked up! No top-ups needed right now.</li>";
+      : "<li>No immediate restocking is required.</li>";
 
     refs.forecastResult.classList.remove("muted");
     refs.forecastResult.innerHTML = `
       <div style="line-height: 1.8">
-        <p><strong>🎯 Expected Demand:</strong> ${p.cluster_name}</p>
-        <p><strong>📊 Confidence:</strong> ${(Number(p.membership_strength) * 100).toFixed(0)}% sure</p>
-        <p><strong>💡 What to do:</strong> ${p.supply_action}</p>
-        <p><strong>📋 Suggested Restocking:</strong></p>
+        <p><strong>Demand Pattern:</strong> ${p.cluster_name}</p>
+        <p><strong>Confidence:</strong> ${(Number(p.membership_strength) * 100).toFixed(0)}%</p>
+        <p><strong>Recommended Action:</strong> ${p.supply_action}</p>
+        <p><strong>Suggested Restocking:</strong></p>
         <ul style="margin:8px 0">${recs}</ul>
       </div>
     `;
   } catch (err) {
     refs.forecastResult.classList.remove("muted");
-    refs.forecastResult.innerHTML = `<p style="color:#b91c1c">❌ Forecast failed: ${err.message}</p>`;
+    refs.forecastResult.innerHTML = `<p style="color:#b91c1c">Forecast failed: ${err.message}</p>`;
   }
 });
 

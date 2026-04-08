@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from preprocess import preprocess_row
 
@@ -35,6 +35,13 @@ class SupplierIn(BaseModel):
     location: str = Field(min_length=2, max_length=120)
     lead_time_days: int = Field(ge=1, le=60)
     reliability_score: float = Field(ge=0.0, le=1.0)
+
+    @field_validator("contact", mode="before")
+    @classmethod
+    def normalize_contact(cls, value):
+        if value is None:
+            return value
+        return str(value).strip()
 
 
 class Supplier(SupplierIn):
@@ -267,18 +274,7 @@ def _normalize_keys(payload: dict) -> dict:
 
     normalized = {}
     for k, v in payload.items():
-        mapped_key = key_map.get(k, k)
-
-        # UI uses 0=Sunday..6=Saturday, while training data uses
-        # pandas dayofweek (0=Monday..6=Sunday).
-        if mapped_key == "DayOfWeekNum":
-            try:
-                v = int(v)
-                v = (v + 6) % 7
-            except (TypeError, ValueError):
-                pass
-
-        normalized[mapped_key] = v
+        normalized[key_map.get(k, k)] = v
     return normalized
 
 
@@ -288,6 +284,26 @@ def _confidence(strength: float) -> str:
     if strength >= 0.45:
         return "medium"
     return "low"
+
+
+def _fallback_cluster_by_demand(daily_sold: float) -> Optional[int]:
+    candidates = []
+    for key, meta in CLUSTER_INFO.items():
+        if key == "-1":
+            continue
+        avg = meta.get("avg_daily_sold")
+        if avg is None:
+            continue
+        try:
+            candidates.append((int(key), float(avg)))
+        except (TypeError, ValueError):
+            continue
+
+    if not candidates:
+        return None
+
+    best_cluster, _ = min(candidates, key=lambda item: abs(item[1] - float(daily_sold)))
+    return best_cluster
 
 
 @app.get("/health")
@@ -444,6 +460,15 @@ def _predict_from_payload(payload: dict):
 
         cluster = int(labels[0])
         strength = float(strengths[0])
+
+        fallback_applied = False
+        if cluster == -1:
+            fallback_cluster = _fallback_cluster_by_demand(normalized.get("Daily_Sold", 0))
+            if fallback_cluster is not None:
+                cluster = fallback_cluster
+                strength = max(strength, 0.35)
+                fallback_applied = True
+
         cluster_meta = CLUSTER_INFO.get(str(cluster), CLUSTER_INFO.get("-1", {}))
 
         return {
@@ -454,6 +479,7 @@ def _predict_from_payload(payload: dict):
             "supply_action": cluster_meta.get("supply_action", "Manual review recommended."),
             "membership_strength": round(strength, 4),
             "confidence": _confidence(strength),
+            "fallback_applied": fallback_applied,
         }
     except HTTPException:
         raise
